@@ -1,0 +1,12 @@
+server:
+  port: 8089
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/spring_shiro?useUnicode=true&amp;characterEncoding=UTF-8
+    username: root
+    password: passwd
+    type: com.alibaba.druid.pool.DruidDataSource
+  http:
+    encoding: utf-8
+      enabled: true
