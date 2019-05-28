@@ -1,12 +1,12 @@
 package com.hwx.config;
 
+import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.cache.ehcache.EhCacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
-import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,7 +28,7 @@ public class ShiroConfig {
     public HashedCredentialsMatcher hashedCredentialsMatcher() {
         HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
         hashedCredentialsMatcher.setHashAlgorithmName("md5");
-       // hashedCredentialsMatcher.setHashIterations(1);
+        hashedCredentialsMatcher.setHashIterations(1);
         return hashedCredentialsMatcher;
     }
 
@@ -36,53 +36,34 @@ public class ShiroConfig {
     @Bean
     public CustomShiroRealm customShiroRealm() {
         CustomShiroRealm customShiroRealm = new CustomShiroRealm();
-     //   customShiroRealm.setCredentialsMatcher(hashedCredentialsMatcher());
+        customShiroRealm.setCredentialsMatcher(this.retryLimitCredentialsMatcher());
+    //    customShiroRealm.setCredentialsMatcher(hashedCredentialsMatcher());
         return customShiroRealm;
     }
 
     //权限管理，配置主要是Realm的管理认证
-    /*@Bean
+    @Bean
     public SecurityManager securityManager() {
         DefaultWebSecurityManager defaultWebSecurityManager = new DefaultWebSecurityManager();
-        defaultWebSecurityManager.setRealm(customShiroRealm());
+        defaultWebSecurityManager.setRealm(this.customShiroRealm());
         return defaultWebSecurityManager;
-    }*/
-    /**
-     * 安全管理器
-     */
-    @Bean
-    public DefaultWebSecurityManager securityManager(CookieRememberMeManager rememberMeManager,
-                                                     CacheManager cacheShiroManager,
-                                                     SessionManager sessionManager,
-                                                     RetryLimitCredentialsMatcher retryLimitCredentialsMatcher) {
-        DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
-
-        //把自定义的Realm注入安全管理器中
-        securityManager.setRealm(this.shiroDbRealm(retryLimitCredentialsMatcher));
-        securityManager.setCacheManager(cacheShiroManager);
-        securityManager.setRememberMeManager(rememberMeManager);
-        securityManager.setSessionManager(sessionManager);
-        return securityManager;
     }
-
-    /**
-     * 缓存管理器 使用Ehcache实现
-     */
     @Bean
-    public CacheManager getCacheShiroManager(EhCacheManagerFactoryBean ehcache) {
+    public EhCacheManager ehCacheManager() {
         EhCacheManager ehCacheManager = new EhCacheManager();
-        ehCacheManager.setCacheManager(ehcache.getObject());
-        ehCacheManager.setCacheManagerConfigFile("ehcache.xml");
+        ehCacheManager.setCacheManagerConfigFile("classpath:ehcache.xml");
         return ehCacheManager;
     }
+
     @Bean
-    public RetryLimitCredentialsMatcher getRetryLimit(CacheManager cacheManager){
-        RetryLimitCredentialsMatcher retryLimitCredentialsMatcher = new RetryLimitCredentialsMatcher(cacheManager);
-        retryLimitCredentialsMatcher.setHashAlgorithmName(ShiroKit.HASH_ALGORITHM_NAME);
-        retryLimitCredentialsMatcher.setHashIterations(ShiroKit.HASHITERATIONS);
+    public CredentialsMatcher retryLimitCredentialsMatcher() {
+        RetryLimitCredentialsMatcher retryLimitCredentialsMatcher = new RetryLimitCredentialsMatcher(this.ehCacheManager());
+        retryLimitCredentialsMatcher.setHashAlgorithmName("md5");
+        retryLimitCredentialsMatcher.setHashIterations(1);
         retryLimitCredentialsMatcher.setStoredCredentialsHexEncoded(true);
         return retryLimitCredentialsMatcher;
     }
+
 
     //Filter工厂，设置对应的过滤条件和跳转条件
     @Bean

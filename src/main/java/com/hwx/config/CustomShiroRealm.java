@@ -4,10 +4,7 @@ import com.hwx.dao.SysRoleMapper;
 import com.hwx.dao.SysUserMapper;
 import com.hwx.model.SysRole;
 import com.hwx.model.SysUser;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -65,6 +62,9 @@ public class CustomShiroRealm extends AuthorizingRealm {
         }
 
         SysUser sysUser = sysUserMapper.selectByUserName(userName);
+        if(null == sysUser){
+            throw new UnknownAccountException();
+        }
         SimpleAuthenticationInfo simpleAuthenticationInfo = new SimpleAuthenticationInfo(sysUser.getUsername(), sysUser.getPasswd(), getName());
         return simpleAuthenticationInfo;
     }

@@ -5,7 +5,7 @@
 <generatorConfiguration>
 
     <!-- 本地数据库驱动程序jar包的全路径 -->
-    <classPathEntry location="C:\program\mysql-connector-java-5.1.47.jar"/>
+    <classPathEntry location="E:\repo\mysql\mysql-connector-java\5.1.47\mysql-connector-java-5.1.47.jar"/>
 
     <context id="context" targetRuntime="MyBatis3">
         <commentGenerator>
@@ -15,9 +15,9 @@
 
         <!-- 数据库的相关配置 -->
         <jdbcConnection driverClass="com.mysql.jdbc.Driver"
-                        connectionURL="jdbc:mysql://127.0.0.1:3306/springboot?useUnicode=true&amp;characterEncoding=utf-8"
+                        connectionURL="jdbc:mysql://192.168.124.128:3306/springboot?useUnicode=true&amp;characterEncoding=utf-8"
                         userId="root"
-                        password="passwd"/>
+                        password="root"/>
 
         <javaTypeResolver>
             <property name="forceBigDecimals" value="false"/>
@@ -47,7 +47,7 @@
         </javaClientGenerator>
 
         <!-- 相关表的配置 -->
-        <table tableName="sys_user" enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+        <table tableName="sys_role" enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
                enableUpdateByExample="false"/>
     </context>
 </generatorConfiguration>

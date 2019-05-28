@@ -3,60 +3,48 @@ package com.hwx.config;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.ExcessiveAttemptsException;
+import org.apache.shiro.authc.LockedAccountException;
+import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.authc.credential.SimpleCredentialsMatcher;
 import org.apache.shiro.cache.Cache;
-import org.apache.shiro.cache.CacheManager;
+import org.apache.shiro.cache.ehcache.EhCacheManager;
+import org.springframework.stereotype.Component;
 
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RetryLimitCredentialsMatcher extends SimpleCredentialsMatcher {
-    /**
-     * 密码输入错误次数就被冻结
-     */
-    private Integer errorPasswordTimes=5;
-
+/**
+ * @author: Huawei Xie
+ * @date: 2019/5/28
+ */
+//@Component
+public class RetryLimitCredentialsMatcher  extends HashedCredentialsMatcher {
+    private static final int MAX_LOGIN_RETRY_TIMES = 5;
     private Cache<String, AtomicInteger> passwordRetryCache;
 
-    /**
-     * 构造方法 创建对象,传入缓存的管理器
-     * @param cacheManager
-     */
-    public RetryLimitCredentialsMatcher(CacheManager cacheManager) {
-        passwordRetryCache = cacheManager.getCache("passwordRetryCache");
+    public RetryLimitCredentialsMatcher(EhCacheManager ehCacheManager) {
+        passwordRetryCache = ehCacheManager.getCache("passwordRetryCache");
     }
 
-    /**
-     * 方法名: doCredentialsMatch
-     * 方法描述: 用户登录错误次数方法.
-     * 修改日期: 2019/2/26 20:19
-     * @param token
-     * @param info
-     * @return boolean
-     * @throws
-     */
     @Override
-    public boolean doCredentialsMatch(AuthenticationToken token,
-                                      AuthenticationInfo info) {
-        String username = (String) token.getPrincipal();
-        Set<String> keys = passwordRetryCache.keys();
-
-        // retry count + 1
-        AtomicInteger retryCount = passwordRetryCache.get(username);
+    public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) throws ExcessiveAttemptsException{
+        String userName = (String) token.getPrincipal();
+        AtomicInteger retryCount = passwordRetryCache.get(userName);
         if (retryCount == null) {
+            // 高并发下使用的线程安全的int类
             retryCount = new AtomicInteger(0);
-            passwordRetryCache.put(username, retryCount);
+            passwordRetryCache.put(userName, retryCount);
         }
-        if (retryCount.incrementAndGet() > errorPasswordTimes) {
-            // if retry count > 5 throw
+        if (retryCount.incrementAndGet() > MAX_LOGIN_RETRY_TIMES) {
             throw new ExcessiveAttemptsException();
         }
 
-        boolean matches = super.doCredentialsMatch(token, info);
-        if (matches) {
-            // clear retry count
-            passwordRetryCache.remove(username);
+        boolean match = super.doCredentialsMatch(token, info);
+        if (match) {
+            passwordRetryCache.remove(userName);
         }
-        return matches;
+
+        return match;
     }
+
+
 }
