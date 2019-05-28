@@ -1,12 +1,14 @@
-server:
-  port: 8089
 spring:
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/spring_shiro?useUnicode=true&amp;characterEncoding=UTF-8
+    url: jdbc:mysql://127.0.0.1:3306/springboot?useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
     password: passwd
-    type: com.alibaba.druid.pool.DruidDataSource
-  http:
-    encoding: utf-8
-      enabled: true
+    driver-class-name: com.mysql.jdbc.Driver
+  #  type: com.alibaba.druid.pool.DruidDataSource
+  #thymeleaf:
+  #  cache: false
+  #  mode: HTML
+mybatis:
+  mapper-locations: classpath:mappers/*.xml
+server:
+  port: 8888

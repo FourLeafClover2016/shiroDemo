@@ -1,4 +1,4 @@
-package com.example.shiroDemo;
+package com.hwx.shiroDemo;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
